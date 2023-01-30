@@ -9,16 +9,11 @@ console.log("gatsby-source-shopify-storefront is on!")
 import {
   ArticleNode,
   BlogNode,
-  CollectionNode,
   CommentNode,
-  ProductNode,
-  ProductOptionNode,
-  ProductVariantNode,
-  ProductMetafieldNode,
-  ProductVariantMetafieldNode,
   ShopPolicyNode,
   ShopDetailsNode,
   PageNode,
+  PageMetafieldNode,
 } from "./nodes"
 import {
   SHOP,
@@ -26,8 +21,6 @@ import {
   NODE_TO_ENDPOINT_MAPPING,
   ARTICLE,
   BLOG,
-  COLLECTION,
-  PRODUCT,
   SHOP_POLICY,
   SHOP_DETAILS,
   PAGE,
@@ -35,8 +28,6 @@ import {
 import {
   ARTICLES_QUERY,
   BLOGS_QUERY,
-  COLLECTIONS_QUERY,
-  PRODUCTS_QUERY,
   SHOP_POLICIES_QUERY,
   SHOP_DETAILS_QUERY,
   PAGES_QUERY,
@@ -68,8 +59,6 @@ export const sourceNodes = async (
   const defaultQueries = {
     articles: ARTICLES_QUERY,
     blogs: BLOGS_QUERY,
-    collections: COLLECTIONS_QUERY,
-    products: PRODUCTS_QUERY,
     shopPolicies: SHOP_POLICIES_QUERY,
     shopDetails: SHOP_DETAILS_QUERY,
     pages: PAGES_QUERY,
@@ -115,38 +104,6 @@ export const sourceNodes = async (
     let promises = []
     if (includeCollections.includes(SHOP)) {
       promises = promises.concat([
-        createNodes(COLLECTION, queries.collections, CollectionNode, args),
-        createNodes(
-          PRODUCT,
-          queries.products,
-          ProductNode,
-          args,
-          async (product, productNode) => {
-            if (product.variants)
-              await forEach(product.variants.edges, async edge => {
-                const v = edge.node
-                if (v.metafields)
-                  await forEach(v.metafields.edges, async edge =>
-                    createNode(
-                      await ProductVariantMetafieldNode(imageArgs)(edge.node)
-                    )
-                  )
-                return createNode(
-                  await ProductVariantNode(imageArgs, productNode)(edge.node)
-                )
-              })
-
-            if (product.metafields)
-              await forEach(product.metafields.edges, async edge =>
-                createNode(await ProductMetafieldNode(imageArgs)(edge.node))
-              )
-
-            if (product.options)
-              await forEach(product.options, async option =>
-                createNode(await ProductOptionNode(imageArgs)(option))
-              )
-          }
-        ),
         createShopPolicies(args),
         createShopDetails(args),
       ])
@@ -160,7 +117,18 @@ export const sourceNodes = async (
               createNode(await CommentNode(imageArgs)(edge.node))
             )
         }),
-        createPageNodes(PAGE, queries.pages, PageNode, args),
+        createPageNodes(
+          PAGE,
+          queries.pages,
+          PageNode,
+          args,
+          async (page, pageNode) => {
+            if (page.metafields)
+              await forEach(page.metafields.edges, async edge =>
+                createNode(await PageMetafieldNode(imageArgs)(edge.node))
+              )
+          }
+        ),
       ])
     }
 
@@ -253,7 +221,7 @@ const createPageNodes = async (
   endpoint,
   query,
   nodeFactory,
-  { client, createNode, formatMsg, verbose, paginationSize },
+  { client, createNode, formatMsg, verbose, imageArgs, paginationSize },
   f = async () => {}
 ) => {
   // Message printed when fetching is complete.
@@ -268,9 +236,9 @@ const createPageNodes = async (
       paginationSize
     ),
     async entity => {
-      const node = await nodeFactory(entity)
+      const node = await nodeFactory(imageArgs)(entity)
       createNode(node)
-      await f(entity)
+      await f(entity, node)
     }
   )
   if (verbose) console.timeEnd(msg)

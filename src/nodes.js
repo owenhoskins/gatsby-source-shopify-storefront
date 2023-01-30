@@ -16,6 +16,7 @@ import {
   SHOP_POLICY,
   SHOP_DETAILS,
   PAGE,
+  PAGE_METAFIELD,
 } from "./constants"
 
 const { createNodeFactory, generateNodeId } = createNodeHelpers({
@@ -192,4 +193,18 @@ export const ShopPolicyNode = createNodeFactory(SHOP_POLICY)
 
 export const ShopDetailsNode = createNodeFactory(SHOP_DETAILS)
 
-export const PageNode = createNodeFactory(PAGE)
+export const PageMetafieldNode = _imageArgs => createNodeFactory(PAGE_METAFIELD)
+
+export const PageNode = imageArgs =>
+  createNodeFactory(PAGE, async node => {
+    if (node.metafields) {
+      const metafields = node.metafields.edges.map(edge => edge.node)
+
+      node.metafields___NODE = metafields.map(metafield =>
+        generateNodeId(PAGE_METAFIELD, metafield.id)
+      )
+      delete node.metafields
+    }
+
+    return node
+  })
