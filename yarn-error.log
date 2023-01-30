@@ -1,0 +1,79 @@
+Arguments: 
+  /Users/owenhoskins/.nvm/versions/node/v16.15.1/bin/node /usr/local/Cellar/yarn/1.22.19/libexec/bin/yarn.js install
+
+PATH: 
+  /Users/owenhoskins/.nvm/versions/node/v16.15.1/bin:/usr/local/opt/mongodb-community@3.6/bin:/Users/owenhoskins/.pyenv/shims:/usr/local/opt/python/libexec/bin:/usr/local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/MacGPG2/bin:/Applications/Wireshark.app/Contents/MacOS:/usr/local/bin:/Users/owenhoskins/flutter/bin
+
+Yarn version: 
+  1.22.19
+
+Node version: 
+  16.15.1
+
+Platform: 
+  darwin x64
+
+Trace: 
+  SyntaxError: /Users/owenhoskins/Sites/cm/src/2022/storefront/plugins/gatsby-source-shopify-storefront/package.json: Unexpected token } in JSON at position 879
+      at JSON.parse (<anonymous>)
+      at /usr/local/Cellar/yarn/1.22.19/libexec/lib/cli.js:1629:59
+      at Generator.next (<anonymous>)
+      at step (/usr/local/Cellar/yarn/1.22.19/libexec/lib/cli.js:310:30)
+      at /usr/local/Cellar/yarn/1.22.19/libexec/lib/cli.js:321:13
+
+npm manifest: 
+  {
+    "name": "gatsby-source-shopify-storefront",
+    "version": "4.7.1",
+    "description": "Gatsby source plugin for building websites using Shopify as a data source.",
+    "scripts": {
+      "build": "babel src --out-dir . --ignore \"**/__tests__\"",
+      "prepare": "cross-env NODE_ENV=production npm run build",
+      "watch": "npm run build -- --watch"
+    },
+    "homepage": "https://github.com/gatsbyjs/gatsby/tree/master/packages/gatsby-source-shopify#readme",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/gatsbyjs/gatsby.git",
+      "directory": "packages/gatsby-source-shopify-storefront"
+    },
+    "bugs": {
+      "url": "https://github.com/gatsbyjs/gatsby/issues"
+    },
+    "keywords": [
+      "gatsby",
+      "gatsby-plugin",
+      "gatsby-source-plugin",
+      "shopify"
+    ],
+    "author": "Angelo Ashmore",
+    "license": "MIT",
+    "peerDependencies": {
+      "gatsby": "^4.5.0",
+    },
+    "devDependencies": {
+      "@babel/cli": "^7.14.0",
+      "@babel/core": "^7.14.0",
+      "cross-env": "^7.0.3"
+    },
+    "dependencies": {
+      "babel-preset-gatsby-package": "^1.7.1",
+      "chalk": "^4.1.0",
+      "gatsby-node-helpers": "^0.3.0",
+      "gatsby-source-filesystem": "^4.5.0",
+      "graphql-request": "^1.8.2",
+      "lodash": "^4.17.21",
+      "p-iteration": "^1.1.8",
+      "prettyjson": "^1.2.1"
+    },
+    "engines": {
+      "node": ">=12.13.0"
+    },
+    "main": "index.js"
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
