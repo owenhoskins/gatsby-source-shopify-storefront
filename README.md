@@ -83,7 +83,7 @@ plugins: [
       // List of collections you want to fetch.
       // Possible values are: 'shop' and 'content'.
       // Defaults to ['shop', 'content'].
-      includeCollections: ["shop", "content"],
+      shopifyConnections: ["shop", "content"],
       // Download Images Locally
       // set to false if you plan on using shopify's CDN
       downloadImages: true,

@@ -49,7 +49,7 @@ export const sourceNodes = async (
     apiVersion = `2020-07`,
     verbose = true,
     paginationSize = 250,
-    includeCollections = [SHOP, CONTENT],
+    shopifyConnections = [SHOP, CONTENT],
     downloadImages = true,
     shopifyQueries = {},
   }
@@ -102,13 +102,13 @@ export const sourceNodes = async (
     const msg = formatMsg(`finished fetching data from Shopify`)
 
     let promises = []
-    if (includeCollections.includes(SHOP)) {
+    if (shopifyConnections.includes(SHOP)) {
       promises = promises.concat([
         createShopPolicies(args),
         createShopDetails(args),
       ])
     }
-    if (includeCollections.includes(CONTENT)) {
+    if (shopifyConnections.includes(CONTENT)) {
       promises = promises.concat([
         createNodes(BLOG, queries.blogs, BlogNode, args),
         createNodes(ARTICLE, queries.articles, ArticleNode, args, async x => {
@@ -117,7 +117,7 @@ export const sourceNodes = async (
               createNode(await CommentNode(imageArgs)(edge.node))
             )
         }),
-        createPageNodes(
+        createNodes(
           PAGE,
           queries.pages,
           PageNode,
