@@ -17,6 +17,7 @@ import {
   SHOP_DETAILS,
   PAGE,
   PAGE_METAFIELD,
+  MENU,
 } from "./constants"
 
 const { createNodeFactory, generateNodeId } = createNodeHelpers({
@@ -192,6 +193,8 @@ export const ProductVariantMetafieldNode = _imageArgs =>
 export const ShopPolicyNode = createNodeFactory(SHOP_POLICY)
 
 export const ShopDetailsNode = createNodeFactory(SHOP_DETAILS)
+
+export const MenuNode = createNodeFactory(MENU)
 
 export const PageMetafieldNode = _imageArgs => createNodeFactory(PAGE_METAFIELD)
 

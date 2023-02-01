@@ -22,8 +22,14 @@ export const printGraphQLError = e => {
 /**
  * Request a query from a client.
  */
-export const queryOnce = async (client, query, first = 250, after) =>
-  await client.request(query, { first, after })
+export const queryOnce = async (client, query, first = 250, after, arg) =>
+  await client.request(query, { first, after, arg })
+
+/**
+ * Request a query from a client.
+ */
+export const queryMenuWithHandle = async (client, query, handle) =>
+  await client.request(query, { handle })
 
 /**
  * Get all paginated data from a query. Will execute multiple requests as

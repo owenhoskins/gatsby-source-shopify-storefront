@@ -45,7 +45,7 @@ export const ARTICLES_QUERY = `
           publishedAt
           tags
           title
-          url
+          onlineStoreUrl
           seo {
             title
             description
@@ -69,7 +69,7 @@ export const BLOGS_QUERY = `
           id
           handle
           title
-          url
+          onlineStoreUrl
         }
       }
     }
@@ -284,7 +284,25 @@ export const PAGES_QUERY = `
           body
           bodySummary
           updatedAt
-          url
+          onlineStoreUrl
+        }
+      }
+    }
+  }
+`
+
+export const MENU_QUERY = `
+  query GetMenu($handle: String!) {
+    menu(handle: $handle) {
+      id
+      handle
+      title
+      items {
+        title
+        type
+        items {
+          title
+          type
         }
       }
     }

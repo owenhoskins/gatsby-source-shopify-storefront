@@ -1,7 +1,12 @@
 import { pipe } from "lodash/fp"
 import chalk from "chalk"
 import { forEach } from "p-iteration"
-import { printGraphQLError, queryAll, queryOnce } from "./lib"
+import {
+  printGraphQLError,
+  queryAll,
+  queryOnce,
+  queryMenuWithHandle,
+} from "./lib"
 import { createClient } from "./create-client"
 
 console.log("gatsby-source-shopify-storefront is on!")
@@ -12,6 +17,7 @@ import {
   CommentNode,
   ShopPolicyNode,
   ShopDetailsNode,
+  MenuNode,
   PageNode,
   PageMetafieldNode,
 } from "./nodes"
@@ -24,6 +30,8 @@ import {
   SHOP_POLICY,
   SHOP_DETAILS,
   PAGE,
+  NAVIGATION,
+  MENU,
 } from "./constants"
 import {
   ARTICLES_QUERY,
@@ -31,6 +39,7 @@ import {
   SHOP_POLICIES_QUERY,
   SHOP_DETAILS_QUERY,
   PAGES_QUERY,
+  MENU_QUERY,
 } from "./queries"
 
 export const sourceNodes = async (
@@ -46,10 +55,10 @@ export const sourceNodes = async (
   {
     shopName,
     accessToken,
-    apiVersion = `2020-07`,
+    apiVersion = `2023-01`, // 2020-07 does not contain the `menu` field on QueryRoot
     verbose = true,
     paginationSize = 250,
-    shopifyConnections = [SHOP, CONTENT],
+    shopifyConnections = [SHOP, CONTENT, NAVIGATION],
     downloadImages = true,
     shopifyQueries = {},
   }
@@ -62,6 +71,7 @@ export const sourceNodes = async (
     shopPolicies: SHOP_POLICIES_QUERY,
     shopDetails: SHOP_DETAILS_QUERY,
     pages: PAGES_QUERY,
+    menu: MENU_QUERY,
   }
 
   const queries = { ...defaultQueries, ...shopifyQueries }
@@ -101,6 +111,8 @@ export const sourceNodes = async (
     // Message printed when fetching is complete.
     const msg = formatMsg(`finished fetching data from Shopify`)
 
+    console.log("shopifyConnections test:", shopifyConnections)
+
     let promises = []
     if (shopifyConnections.includes(SHOP)) {
       promises = promises.concat([
@@ -130,6 +142,10 @@ export const sourceNodes = async (
           }
         ),
       ])
+    }
+
+    if (shopifyConnections.includes(NAVIGATION)) {
+      promises = promises.concat([createMenus(args)])
     }
 
     console.time(msg)
@@ -176,7 +192,39 @@ const createNodes = async (
 }
 
 /**
- * Fetch and create nodes for shop policies.
+ * Fetch and create nodes for shop main menu.
+ */
+const createMenus = async ({
+  client,
+  createNode,
+  formatMsg,
+  verbose,
+  queries,
+}) => {
+  // // Message printed when fetching is complete.
+  const msg = formatMsg(`fetched and processed ${NAVIGATION} nodes`)
+
+  if (verbose) console.time(msg)
+  const { menu: mainMenu } = await queryMenuWithHandle(
+    client,
+    queries.menu,
+    "main-menu"
+  )
+  const { menu: footerMenu } = await queryMenuWithHandle(
+    client,
+    queries.menu,
+    "footer"
+  )
+  const menus = { mainMenu, footerMenu }
+  Object.entries(menus)
+    .filter(([_, menu]) => Boolean(menu))
+    .forEach(pipe(([type, menu]) => MenuNode(menu, { type }), createNode))
+
+  if (verbose) console.timeEnd(msg)
+}
+
+/**
+ * Fetch and create nodes for shop details.
  */
 const createShopDetails = async ({
   client,

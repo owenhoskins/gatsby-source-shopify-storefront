@@ -15,8 +15,10 @@ export const SHOP_POLICY = `ShopPolicy`
 export const SHOP_DETAILS = `Shop`
 export const PAGE = `Page`
 export const PAGE_METAFIELD = `PageMetafield`
+export const MENU = `Menu`
 export const SHOP = `shop`
 export const CONTENT = `content`
+export const NAVIGATION = `navigation`
 
 export const NODE_TO_ENDPOINT_MAPPING = {
   [ARTICLE]: `articles`,
