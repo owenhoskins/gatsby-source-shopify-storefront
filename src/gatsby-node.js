@@ -8,13 +8,11 @@ import {
   queryMenuWithHandle,
 } from "./lib"
 import { createClient } from "./create-client"
+import { createNodeHelpers } from "gatsby-node-helpers"
 
 console.log("gatsby-source-shopify-storefront is on!")
 
 import {
-  ArticleNode,
-  BlogNode,
-  CommentNode,
   ShopPolicyNode,
   ShopDetailsNode,
   MenuNode,
@@ -22,20 +20,18 @@ import {
   PageMetafieldNode,
 } from "./nodes"
 import {
+  TYPE_PREFIX,
   SHOP,
   CONTENT,
   NODE_TO_ENDPOINT_MAPPING,
-  ARTICLE,
-  BLOG,
   SHOP_POLICY,
   SHOP_DETAILS,
   PAGE,
+  PAGE_METAFIELD,
   NAVIGATION,
   MENU,
 } from "./constants"
 import {
-  ARTICLES_QUERY,
-  BLOGS_QUERY,
   SHOP_POLICIES_QUERY,
   SHOP_DETAILS_QUERY,
   PAGES_QUERY,
@@ -46,6 +42,7 @@ export const sourceNodes = async (
   {
     actions: { createNode, touchNode },
     createNodeId,
+    createContentDigest,
     store,
     cache,
     getCache,
@@ -66,8 +63,6 @@ export const sourceNodes = async (
   const client = createClient(shopName, accessToken, apiVersion)
 
   const defaultQueries = {
-    articles: ARTICLES_QUERY,
-    blogs: BLOGS_QUERY,
     shopPolicies: SHOP_POLICIES_QUERY,
     shopDetails: SHOP_DETAILS_QUERY,
     pages: PAGES_QUERY,
@@ -108,36 +103,38 @@ export const sourceNodes = async (
       queries,
     }
 
+    const helpers = createNodeHelpers({
+      typePrefix: TYPE_PREFIX,
+      createNodeId: createNodeId,
+      createContentDigest: createContentDigest,
+    })
+
     // Message printed when fetching is complete.
     const msg = formatMsg(`finished fetching data from Shopify`)
 
     console.log("shopifyConnections test:", shopifyConnections)
 
     let promises = []
+
     if (shopifyConnections.includes(SHOP)) {
       promises = promises.concat([
-        createShopPolicies(args),
-        createShopDetails(args),
+        createShopPolicies(args, helpers),
+        // createShopDetails(args, helpers),
       ])
     }
+
     if (shopifyConnections.includes(CONTENT)) {
       promises = promises.concat([
-        createNodes(BLOG, queries.blogs, BlogNode, args),
-        createNodes(ARTICLE, queries.articles, ArticleNode, args, async x => {
-          if (x.comments)
-            await forEach(x.comments.edges, async edge =>
-              createNode(await CommentNode(imageArgs)(edge.node))
-            )
-        }),
         createNodes(
           PAGE,
           queries.pages,
           PageNode,
           args,
+          helpers,
           async (page, pageNode) => {
             if (page.metafields)
               await forEach(page.metafields.edges, async edge =>
-                createNode(await PageMetafieldNode(imageArgs)(edge.node))
+                createNode(await PageMetafieldNode(edge.node, helpers))
               )
           }
         ),
@@ -145,7 +142,7 @@ export const sourceNodes = async (
     }
 
     if (shopifyConnections.includes(NAVIGATION)) {
-      promises = promises.concat([createMenus(args)])
+      promises = promises.concat([createMenus(args, helpers)])
     }
 
     console.time(msg)
@@ -169,6 +166,7 @@ const createNodes = async (
   query,
   nodeFactory,
   { client, createNode, formatMsg, verbose, imageArgs, paginationSize },
+  helpers,
   f = async () => {}
 ) => {
   // Message printed when fetching is complete.
@@ -183,7 +181,7 @@ const createNodes = async (
       paginationSize
     ),
     async entity => {
-      const node = await nodeFactory(imageArgs)(entity)
+      const node = nodeFactory(entity, helpers)
       createNode(node)
       await f(entity, node)
     }
@@ -194,13 +192,10 @@ const createNodes = async (
 /**
  * Fetch and create nodes for shop main menu.
  */
-const createMenus = async ({
-  client,
-  createNode,
-  formatMsg,
-  verbose,
-  queries,
-}) => {
+const createMenus = async (
+  { client, createNode, formatMsg, verbose, queries },
+  helpers
+) => {
   // // Message printed when fetching is complete.
   const msg = formatMsg(`fetched and processed ${NAVIGATION} nodes`)
 
@@ -218,7 +213,7 @@ const createMenus = async ({
   const menus = { mainMenu, footerMenu }
   Object.entries(menus)
     .filter(([_, menu]) => Boolean(menu))
-    .forEach(pipe(([type, menu]) => MenuNode(menu, { type }), createNode))
+    .forEach(pipe(([type, menu]) => MenuNode(menu, helpers), createNode))
 
   if (verbose) console.timeEnd(msg)
 }
@@ -226,32 +221,26 @@ const createMenus = async ({
 /**
  * Fetch and create nodes for shop details.
  */
-const createShopDetails = async ({
-  client,
-  createNode,
-  formatMsg,
-  verbose,
-  queries,
-}) => {
+const createShopDetails = async (
+  { client, createNode, formatMsg, verbose, queries },
+  helpers
+) => {
   // // Message printed when fetching is complete.
   const msg = formatMsg(`fetched and processed ${SHOP_DETAILS} nodes`)
 
   if (verbose) console.time(msg)
   const { shop } = await queryOnce(client, queries.shopDetails)
-  createNode(ShopDetailsNode(shop))
+  createNode(ShopDetailsNode(shop, helpers))
   if (verbose) console.timeEnd(msg)
 }
 
 /**
  * Fetch and create nodes for shop policies.
  */
-const createShopPolicies = async ({
-  client,
-  createNode,
-  formatMsg,
-  verbose,
-  queries,
-}) => {
+const createShopPolicies = async (
+  { client, createNode, formatMsg, verbose, queries },
+  helpers
+) => {
   // Message printed when fetching is complete.
   const msg = formatMsg(`fetched and processed ${SHOP_POLICY} nodes`)
 
@@ -260,34 +249,7 @@ const createShopPolicies = async ({
   Object.entries(policies)
     .filter(([_, policy]) => Boolean(policy))
     .forEach(
-      pipe(([type, policy]) => ShopPolicyNode(policy, { type }), createNode)
+      pipe(([type, policy]) => ShopPolicyNode(policy, helpers), createNode)
     )
-  if (verbose) console.timeEnd(msg)
-}
-
-const createPageNodes = async (
-  endpoint,
-  query,
-  nodeFactory,
-  { client, createNode, formatMsg, verbose, imageArgs, paginationSize },
-  f = async () => {}
-) => {
-  // Message printed when fetching is complete.
-  const msg = formatMsg(`fetched and processed ${endpoint} nodes`)
-
-  if (verbose) console.time(msg)
-  await forEach(
-    await queryAll(
-      client,
-      [NODE_TO_ENDPOINT_MAPPING[endpoint]],
-      query,
-      paginationSize
-    ),
-    async entity => {
-      const node = await nodeFactory(imageArgs)(entity)
-      createNode(node)
-      await f(entity, node)
-    }
-  )
   if (verbose) console.timeEnd(msg)
 }
