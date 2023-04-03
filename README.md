@@ -1,14 +1,4 @@
-# 📣 Looking for the latest version of `gatsby-source-shopify`?
-
-👉 Get started at [`gatsbyjs/gatsby-source-shopify`](https://github.com/gatsbyjs/gatsby-source-shopify)
-
-- Support for incremental builds
-- Scale up to 10k products
-- Up to 16x faster builds
-
-`gatsbyjs/gatsby-source-shopify` will replace the below package with the next minor release of `gatsbyjs/gatsby`.
-
----
+# Resurrected version of package that still supports the **Storefront API**
 
 ## Legacy source plugin instructions:
 
@@ -18,13 +8,11 @@ stores via the [Shopify Storefront API][shopify-storefront-api].
 ## Features
 
 - Provides public shop data available via the [Shopify Storefront API][shopify-storefront-api]
-- Supports `gatsby-transformer-sharp` and `gatsby-image` for product and
-  article images
 
 ## Install
 
 ```shell
-npm install gatsby-source-shopify
+npm install gatsby-source-shopify-storefront
 ```
 
 ## How to use
