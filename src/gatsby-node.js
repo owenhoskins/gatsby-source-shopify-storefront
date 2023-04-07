@@ -1,42 +1,39 @@
-import { pipe } from "lodash/fp"
 import chalk from "chalk"
+import { createNodeHelpers } from "gatsby-node-helpers"
+import { pipe } from "lodash/fp"
 import { forEach } from "p-iteration"
+import {
+  CONTENT,
+  NAVIGATION,
+  NODE_TO_ENDPOINT_MAPPING,
+  PAGE,
+  SHOP,
+  SHOP_DETAILS,
+  SHOP_POLICY,
+  TYPE_PREFIX,
+} from "./constants"
+import { createClient } from "./create-client"
 import {
   printGraphQLError,
   queryAll,
-  queryOnce,
   queryMenuWithHandle,
+  queryOnce,
 } from "./lib"
-import { createClient } from "./create-client"
-import { createNodeHelpers } from "gatsby-node-helpers"
-
-console.log("gatsby-source-shopify-storefront is on!")
-
 import {
-  ShopPolicyNode,
-  ShopDetailsNode,
   MenuNode,
-  PageNode,
   PageMetafieldNode,
+  PageNode,
+  ShopDetailsNode,
+  ShopPolicyNode,
 } from "./nodes"
 import {
-  TYPE_PREFIX,
-  SHOP,
-  CONTENT,
-  NODE_TO_ENDPOINT_MAPPING,
-  SHOP_POLICY,
-  SHOP_DETAILS,
-  PAGE,
-  PAGE_METAFIELD,
-  NAVIGATION,
-  MENU,
-} from "./constants"
-import {
-  SHOP_POLICIES_QUERY,
-  SHOP_DETAILS_QUERY,
-  PAGES_QUERY,
   MENU_QUERY,
+  PAGES_QUERY,
+  SHOP_DETAILS_QUERY,
+  SHOP_POLICIES_QUERY,
 } from "./queries"
+
+console.log("gatsby-source-shopify-storefront is on 6/4/22!")
 
 export const sourceNodes = async (
   {
@@ -210,7 +207,12 @@ const createMenus = async (
     queries.menu,
     "footer"
   )
-  const menus = { mainMenu, footerMenu }
+  const { menu: policyMenu } = await queryMenuWithHandle(
+    client,
+    queries.menu,
+    "policy-menu"
+  )
+  const menus = { mainMenu, footerMenu, policyMenu }
   Object.entries(menus)
     .filter(([_, menu]) => Boolean(menu))
     .forEach(pipe(([type, menu]) => MenuNode(menu, helpers), createNode))

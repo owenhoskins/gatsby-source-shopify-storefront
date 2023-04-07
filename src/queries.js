@@ -11,6 +11,13 @@ query GetShop {
 export const SHOP_POLICIES_QUERY = `
   query GetPolicies {
     shop {
+      shippingPolicy {
+        body
+        handle
+        id
+        title
+        url      
+      }      
       privacyPolicy {
         body
         handle
@@ -77,9 +84,11 @@ export const MENU_QUERY = `
       items {
         title
         type
+        url
         items {
           title
           type
+          url
         }
       }
     }
