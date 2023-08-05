@@ -3,37 +3,37 @@ import { createNodeHelpers } from "gatsby-node-helpers"
 import { pipe } from "lodash/fp"
 import { forEach } from "p-iteration"
 import {
-  CONTENT,
-  NAVIGATION,
-  NODE_TO_ENDPOINT_MAPPING,
-  PAGE,
-  SHOP,
-  SHOP_DETAILS,
-  SHOP_POLICY,
-  TYPE_PREFIX,
+    CONTENT,
+    NAVIGATION,
+    NODE_TO_ENDPOINT_MAPPING,
+    PAGE,
+    SHOP,
+    SHOP_DETAILS,
+    SHOP_POLICY,
+    TYPE_PREFIX,
 } from "./constants"
 import { createClient } from "./create-client"
 import {
-  printGraphQLError,
-  queryAll,
-  queryMenuWithHandle,
-  queryOnce,
+    printGraphQLError,
+    queryAll,
+    queryMenuWithHandle,
+    queryOnce,
 } from "./lib"
 import {
-  MenuNode,
-  PageMetafieldNode,
-  PageNode,
-  ShopDetailsNode,
-  ShopPolicyNode,
+    MenuNode,
+    PageMetafieldNode,
+    PageNode,
+    ShopDetailsNode,
+    ShopPolicyNode,
 } from "./nodes"
 import {
-  MENU_QUERY,
-  PAGES_QUERY,
-  SHOP_DETAILS_QUERY,
-  SHOP_POLICIES_QUERY,
+    MENU_QUERY,
+    PAGES_QUERY,
+    SHOP_DETAILS_QUERY,
+    SHOP_POLICIES_QUERY,
 } from "./queries"
 
-console.log("gatsby-source-shopify-storefront is on 6/4/22!")
+console.log("gatsby-source-shopify-storefront is on 5/8/23!")
 
 export const sourceNodes = async (
   {
@@ -70,7 +70,7 @@ export const sourceNodes = async (
 
   // Convenience function to namespace console messages.
   const formatMsg = msg =>
-    chalk`\n{blue gatsby-source-shopify/${shopName}} ${msg}`
+    chalk`\n{blue gatsby-source-shopify-storefront/${shopName}} ${msg}`
 
   try {
     console.log(formatMsg(`starting to fetch data from Shopify`))
@@ -109,7 +109,7 @@ export const sourceNodes = async (
     // Message printed when fetching is complete.
     const msg = formatMsg(`finished fetching data from Shopify`)
 
-    console.log("shopifyConnections test:", shopifyConnections)
+    console.log("shopifyConnections test 2:", shopifyConnections)
 
     let promises = []
 
@@ -128,12 +128,14 @@ export const sourceNodes = async (
           PageNode,
           args,
           helpers,
+          /*
           async (page, pageNode) => {
+            // @TODO: this is not a node
             if (page.metafields)
-              await forEach(page.metafields.edges, async edge =>
-                createNode(await PageMetafieldNode(edge.node, helpers))
+              await forEach(page.metafields, async metafield =>
+                createNode(await PageMetafieldNode(metafield, helpers))
               )
-          }
+          }*/
         ),
       ])
     }

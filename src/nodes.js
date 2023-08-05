@@ -21,9 +21,9 @@ export const MenuNode = (entity, { createNodeId, createNodeFactory }) =>
   createNodeFactory(MENU)(entity)
 
 export const PageMetafieldNode = (entity, { createNodeFactory }) => {
+  console.log("PageMetafieldNode: entity: ", entity)
   const factory = createNodeFactory(PAGE_METAFIELD)
   const node = factory(entity)
-  console.log("PageMetafieldNode: ", node)
   return node
 }
 

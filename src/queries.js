@@ -56,18 +56,22 @@ export const PAGES_QUERY = `
           handle
           title
           body
+          seo {
+            title
+            description
+          }
           bodySummary
           updatedAt
           onlineStoreUrl
-          metafields(first: 30) {
-            edges {
-              node {
-                id
-                key
-                value
-                description
-              }
-            }
+          metafields(identifiers: [ 
+           {namespace: "custom", key: "stockist"}
+          ]) { 
+           type 
+           namespace 
+           key 
+           value
+           id
+           description
           }
         }
       }
